@@ -1,0 +1,30 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+
+# Packaging/build outputs
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.swp

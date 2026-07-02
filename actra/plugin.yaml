@@ -1,0 +1,28 @@
+name: actra
+label: actra
+kind: platform
+version: 0.1.0
+description: Custom actra messaging platform adapter for Hermes Agent
+author: Dong Shuaijie
+requires_env:
+  - name: ACTRA_WS_URL
+    description: "Actra WebSocket base URL. If it has no query string, the adapter appends service_type=service and token."
+    prompt: "WebSocket base URL"
+    password: false
+  - name: ACTRA_WS_TOKEN
+    description: "Actra service token"
+    prompt: "Token"
+    password: true
+optional_env:
+  - name: ACTRA_WS_HOME_CHANNEL
+    description: "Default channel for scheduled delivery"
+    password: false
+  - name: ACTRA_APPROVE
+    description: "Set to true to auto-resolve Actra dangerous-command approvals as /approve always."
+    password: false
+  - name: ACTRA_END_IDLE_SECONDS
+    description: "Idle seconds before sending end after a normal message."
+    password: false
+provides_hooks:
+  - pre_tool_call
+  - post_tool_call
