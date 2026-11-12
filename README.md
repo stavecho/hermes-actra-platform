@@ -13,15 +13,15 @@ Hermes Agent 的 Actra message platform 插件。插件通过 WebSocket 接收 A
 
 ## 安装
 
-需要 Python 3.11–3.13、Hermes Agent 0.17.x，以及可访问的 Actra WebSocket 服务。请在运行 Hermes 的同一个 Python 环境中安装插件。
+需要 Hermes Agent，以及可访问的 Actra WebSocket 服务。支持的 Python 版本见下方兼容性表。请在运行 Hermes 的同一个 Python 环境中安装插件。
 
-PyPI 首次发布完成后，可使用：
+安装或升级：
 
 ```bash
-python -m pip install hermes-actra-platform
+python -m pip install --upgrade hermes-actra-platform
 ```
 
-首次发布前，或需要安装 GitHub 上的版本时：
+需要安装 GitHub 上的版本时：
 
 ```bash
 python -m pip install "git+https://github.com/stavecho/hermes-actra-platform.git"
@@ -44,6 +44,28 @@ platforms:
 ```bash
 hermes gateway
 ```
+
+## Hermes 兼容性
+
+`0.1.1` 针对以下版本执行安装、插件加载和离线消息流程检查：
+
+| Hermes 来源 | 版本 | 验证的 Python 版本 |
+| --- | --- | --- |
+| PyPI（保留旧版本兼容） | `0.17.0` | 3.11、3.12、3.13 |
+| PyPI（2026-11-12 最新版） | `0.19.0` | 3.11、3.12、3.13 |
+| GitHub 稳定版（2026-11-12 最新版） | `v0.23.1` | 3.14 |
+
+GitHub 稳定版与 PyPI 的发版节奏不同。官方 `v0.23.1` 源码的 Python 包元数据版本为 `0.0.0`。从 `0.1.1` 起，Hermes 主程序是预装条件，插件默认只安装自身依赖，避免 pip/uv 将最新 Hermes 源码安装替换成旧的 PyPI 版本。兼容性以表中测试的实际版本和接口为准，不代表支持所有更早版本或未来版本。
+
+Hermes `v0.23.1` 已停止支持通过 PyPI 安装主程序。使用最新版时，请先按 [Hermes 官方安装说明](https://hermes-agent.nousresearch.com/docs/getting-started/installation) 安装 Hermes，再在其 Python 3.14 环境中安装此插件。直接在空环境安装插件不会安装 Hermes 主程序。
+
+仅当需要使用旧的 PyPI 版 Hermes 时，可在 Python 3.11–3.13 环境中显式选择：
+
+```bash
+python -m pip install --upgrade "hermes-actra-platform[hermes]"
+```
+
+GitHub Actions 对表中的组合执行检查。离线检查覆盖入站消息、回复和工具事件、结束事件、中断及 PING，不连接真实 Actra 服务。
 
 ## 环境变量
 
@@ -262,7 +284,7 @@ python -m compileall -q actra
 python scripts/check_install.py
 ```
 
-`check_install.py` 验证安装的分发包、插件资源、pip entry point、Hermes 平台注册和 adapter 初始化；不连接 Actra 服务。
+`check_install.py` 验证安装的分发包、插件资源、pip entry point、Hermes 平台注册、adapter 初始化和离线消息流程；不连接 Actra 服务。
 
 ## 发布
 

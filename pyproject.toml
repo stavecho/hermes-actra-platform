@@ -1,17 +1,21 @@
 [project]
 name = "hermes-actra-platform"
-version = "0.1.0"
+version = "0.1.1"
 description = "Custom actra platform adapter for Hermes Agent"
 readme = "README.md"
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 authors = [{ name = "Dong Shuaijie" }]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 keywords = ["hermes-agent", "actra", "websocket", "plugin"]
 dependencies = [
-  "hermes-agent>=0.17.0,<0.18",
   "websockets>=12.0",
 ]
+
+[project.optional-dependencies]
+# The current Hermes runtime is installed by its own installer/PM and
+# reports 0.0.0. Requiring it here can replace it with an old PyPI release.
+hermes = ["hermes-agent>=0.17.0,<0.24"]
 
 [project.urls]
 Homepage = "https://github.com/stavecho/hermes-actra-platform"
