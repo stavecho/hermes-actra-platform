@@ -18,6 +18,9 @@ dist/
 venv/
 env/
 .env
+.env.*
+!.env.example
+.pypirc
 
 # Local editor and OS files
 .DS_Store

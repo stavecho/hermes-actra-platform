@@ -13,28 +13,36 @@ Hermes Agent 的 Actra message platform 插件。插件通过 WebSocket 接收 A
 
 ## 安装
 
-在你的 Hermes conda 环境中安装：
+需要 Python 3.11–3.13、Hermes Agent 0.17.x，以及可访问的 Actra WebSocket 服务。请在运行 Hermes 的同一个 Python 环境中安装插件。
+
+PyPI 首次发布完成后，可使用：
 
 ```bash
-conda activate hermes-dev
-pip install -e .
+python -m pip install hermes-actra-platform
 ```
 
-当前 Hermes 的 `hermes plugins list/enable` 主要扫描 `~/.hermes/plugins` 目录，不一定会显示 pip entry point 插件。源码开发时可以把插件目录软链过去：
+首次发布前，或需要安装 GitHub 上的版本时：
 
 ```bash
-mkdir -p ~/.hermes/plugins
-ln -sfn /Users/sakura/develop/hermes-actra-platform/actra ~/.hermes/plugins/actra
-hermes plugins list --plain --no-bundled
-hermes plugins enable actra
+python -m pip install "git+https://github.com/stavecho/hermes-actra-platform.git"
 ```
 
-如果只使用 pip entry point，需要确保 Hermes config 中启用插件：
+插件通过 `hermes_agent.plugins` entry point 加载，不需要软链到 `~/.hermes/plugins`。在 Hermes 的 `~/.hermes/config.yaml` 中合并以下配置（保留已有插件和平台配置）：
 
 ```yaml
 plugins:
   enabled:
     - actra
+
+platforms:
+  actra:
+    enabled: true
+```
+
+配置下方必需的环境变量后，启动或重启 Hermes gateway：
+
+```bash
+hermes gateway
 ```
 
 ## 环境变量
@@ -50,7 +58,7 @@ export ACTRA_WS_TOKEN='token'
 
 ```bash
 export ACTRA_WS_HOME_CHANNEL='actra-default'
-export ACTRA_APPROVE='true'
+export ACTRA_APPROVE='false'
 export ACTRA_END_IDLE_SECONDS='1'
 ```
 
@@ -73,9 +81,9 @@ platforms:
   actra:
     enabled: true
     extra:
-      ws_url: ws://192.168.1.231:8080/ws/ibuddi
+      ws_url: wss://example.com/ws
       token: your-token
-      approve: true
+      approve: false
       end_idle_seconds: 1
 ```
 
@@ -239,13 +247,58 @@ Hermes 回复会按同一个 `message_id` 返回：
 
 ## 开发检查
 
-```bash
-conda run -n hermes-dev python -m py_compile actra/adapter.py actra/hooks.py actra/protocol.py actra/__init__.py
-conda run -n hermes-dev python -m ruff check actra
-```
-
-验证 Hermes 能加载插件：
+从源码安装：
 
 ```bash
-conda run -n hermes-dev python -c "from hermes_cli import plugins as p; p._get_enabled_plugins=lambda:{'actra'}; m=p.PluginManager(); m.discover_and_load(force=True); print(m._plugins.get('actra'))"
+git clone https://github.com/stavecho/hermes-actra-platform.git
+cd hermes-actra-platform
+python -m pip install -e .
 ```
+
+在 Hermes 所在的 Python 环境中检查：
+
+```bash
+python -m compileall -q actra
+python scripts/check_install.py
+```
+
+`check_install.py` 验证安装的分发包、插件资源、pip entry point、Hermes 平台注册和 adapter 初始化；不连接 Actra 服务。
+
+## 发布
+
+构建和检查：
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade build twine
+python -m build
+python -m twine check dist/*
+```
+
+建议使用单独的构建环境，避免构建工具与 Hermes 的固定版本依赖发生冲突。GitHub Actions 在 push 和 pull request 时构建分发包，并在另一个虚拟环境中验证 wheel 安装。
+
+自动发布使用 PyPI Trusted Publishing，不需要在仓库中保存 API Token。首次发布前：
+
+1. 注册并验证 [PyPI](https://pypi.org/account/register/) 账号，启用双因素认证。
+2. 在仓库 **Settings → Environments** 创建 `pypi` environment，并配置发布审批人。
+3. 在 [PyPI Publishing](https://pypi.org/manage/account/publishing/) 添加 Pending Publisher，填写：
+
+   | 字段 | 值 |
+   | --- | --- |
+   | PyPI Project Name | `hermes-actra-platform` |
+   | GitHub Owner | `stavecho` |
+   | GitHub Repository | `hermes-actra-platform` |
+   | Workflow filename | `publish.yml` |
+   | Environment name | `pypi` |
+
+4. 创建指向准备发布的提交的 GitHub Release，例如 `v0.1.0`。标签去掉 `v` 后必须与 `pyproject.toml` 的版本一致。
+5. 发布 Release 后，`Publish to PyPI` 工作流会检查版本、构建、验证 wheel 安装，然后上传 PyPI；若 environment 配置了审批，需要先批准发布。
+
+后续发布时，同时更新 `pyproject.toml` 和 `actra/plugin.yaml` 的版本，并使用新的 Release 标签。每次手动构建前清理旧的 `dist/` 产物，避免混入旧版本。
+
+参考：[PyPA GitHub Actions 发布指南](https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/)。
+
+## 许可证
+
+本项目使用 [Apache License 2.0](LICENSE)。

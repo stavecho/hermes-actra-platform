@@ -112,7 +112,7 @@ class ActraAdapter(BasePlatformAdapter):
             try:
                 async with websockets.connect(self.ws_url) as ws:
                     self.ws = ws
-                    logger.info("actra connected to %s", self.ws_url)
+                    logger.info("actra websocket connected")
                     self._start_ping()
 
                     async for raw in ws:
